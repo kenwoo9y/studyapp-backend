@@ -26,7 +26,9 @@
 # Ignore master key for decrypting credentials and more.
 /config/master.key
 
+# Ignore history files
 .irb_history
+.psql_history
 
 # macOS
 .DS_Store
