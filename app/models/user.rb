@@ -15,6 +15,7 @@ class User < ApplicationRecord
                          },
                          format: {
                             with: VALID_PASSWORD_REGEX, 
+                            message: invalid_password, 
                             allow_blank: true
                          },
                          allow_nil: true
