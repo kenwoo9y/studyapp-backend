@@ -1,7 +1,7 @@
 require "validator/email_validator"
 
 class User < ApplicationRecord
-    before validation :downcase_email
+    before_validation :downcase_email
     has_secure_password
 
     validates :name, presence: true,
@@ -23,7 +23,7 @@ class User < ApplicationRecord
                          },
                          format: {
                             with: VALID_PASSWORD_REGEX, 
-                            message: invalid_password, 
+                            message: :invalid_password, 
                             allow_blank: true
                          },
                          allow_nil: true
