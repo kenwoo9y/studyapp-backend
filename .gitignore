@@ -29,6 +29,7 @@
 # Ignore history files
 .irb_history
 .psql_history
+.ash_history
 
 # macOS
 .DS_Store
