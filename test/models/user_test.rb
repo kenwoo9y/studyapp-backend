@@ -83,4 +83,11 @@ class UserTest < ActiveSupport::TestCase
       assert_equal(format_msg, user.errors.full_messages)
     end
   end
+
+  test "email_downcase" do
+    email = "USER@EXAMPLE.COM"
+    user = User.new(email: email)
+    user.save
+    assert user.email == email.downcase
+  end
 end
