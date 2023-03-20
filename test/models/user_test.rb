@@ -90,4 +90,89 @@ class UserTest < ActiveSupport::TestCase
     user.save
     assert user.email == email.downcase
   end
+
+  test "active_user_uniqueness" do
+    email = "test@example.com"
+
+    # No active user
+    count = 3
+    assert_difference("User.count", count) do
+      count.times do |n|
+        User.create(name: "test", email: email, password: "password")
+      end
+    end
+
+    # When the user becomes active
+    active_user = User.find_by(email: email)
+    active_user.update!(activated: true)
+    assert active_user.activated
+
+    assert_no_difference("User.count") do
+      user = User.new(name: "test", email: email, password: "password")
+      user.save
+      uniqueness_msg = ["メールアドレスはすでに存在します"]
+      assert_equal(uniqueness_msg, user.errors.full_messages)
+    end
+
+    # When there are no more active users
+    active_user.destroy!
+    assert_difference("User.count", 1) do
+      User.create(name: "test", email: email, password: "password", activated: true)
+    end
+
+    # Whether active users are unique
+    assert_equal(1, User.where(email: email, activated: true).count)
+  end
+
+  test "password_validation" do
+    # Input required
+    user = User.new(name: "test", email: "test@example.com")
+    user.save
+    required_msg = ["パスワードを入力してください"]
+    assert_equal(required_msg, user.errors.full_messages)
+
+    # min or longer
+    min = 8
+    user.password = "a" * (min - 1)
+    user.save
+    minlength_msg = ["パスワードは8文字以上で入力してください"]
+    assert_equal(minlength_msg, user.errors.full_messages)
+
+    # max or less
+    max = 72
+    user.password = "a" * (max + 1)
+    user.save
+    maxlength_msg = ["パスワードは72文字以内で入力してください"]
+    assert_equal(maxlength_msg, user.errors.full_messages)
+
+    # Format check(Success)
+    ok_passwords = %w(
+      pass---word
+      ________
+      12341234
+      ____pass
+      pass----
+      PASSWORD
+    )
+    ok_passwords.each do |pass|
+      user.password = pass
+      assert user.save
+    end
+
+    # Format check(Error)
+    ng_passwords = %w(
+      pass/word
+      pass.word
+      |~=?+"a"
+      １２３４５６７８
+      ＡＢＣＤＥＦＧＨ
+      password@
+    )
+    format_msg = ["パスワードは半角英数字・-・_が使えます"]
+    ng_passwords.each do |pass|
+      user.password = pass
+      user.save
+      assert_equal(format_msg, user.errors.full_messages)
+    end
+  end
 end
